@@ -4,19 +4,33 @@
   apt_key:
     url: "https://packages.erlang-solutions.com/debian/erlang_solutions.asc"
 
-- name: add erlang solutions repository
-  apt_repository:
-    repo: "deb https://packages.erlang-solutions.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} contrib"
-
-- name: install erlang
-  apt:
-    name: erlang
-
 - name: import rabbitmq apt key
   apt_key:
     url: https://www.rabbitmq.com/rabbitmq-release-signing-key.asc
 
-- name: download rabbitmq package
+### http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_19.3.6-1~ubuntu~trusty_amd64.deb
+### http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_19.3.6-1~ubuntu~trusty_i386.deb
+### http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_19.3.6-1~ubuntu~xenial_amd64.deb
+### http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_19.3.6-1~ubuntu~xenial_i386.deb
+
+- name: built erlang filename
+  set_fact:
+    erlang_file_deb: "esl-erlang_{{ rabbitmq_erlang_version }}-1~{{ ansible_distribution|lower }}~{{ ansible_distribution_release|lower }}_{{ ansible_architecture if ansible_architecture  == 'i386' else 'amd64' }}.deb"
+
+- debug:
+    msg: "{{ erlang_file_deb }}"
+
+- name: "download erlang package version {{ rabbitmq_erlang_version }}"
+  get_url:
+
+    url: "http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/{{ erlang_file_deb }}"
+    dest: "/usr/src/erlang-{{ rabbitmq_erlang_version }}.deb"
+
+- name: install erlang
+  apt:
+    deb: "/usr/src/erlang-{{ rabbitmq_erlang_version }}.deb"
+
+- name: "download rabbitmq package version {{ rabbitmq_version }}"
   get_url:
     url: "https://www.rabbitmq.com/releases/rabbitmq-server/v{{ rabbitmq_version.split('-')[0] }}/rabbitmq-server_{{ rabbitmq_version }}{% if rabbitmq_version | version_compare('3.6.6', '>=') %}{% endif %}_all.deb"
     dest: "/usr/src/rabbitmq-server-{{ rabbitmq_version }}.deb"
