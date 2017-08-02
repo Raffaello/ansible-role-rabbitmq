@@ -17,8 +17,6 @@
   set_fact:
     erlang_file_deb: "esl-erlang_{{ rabbitmq_erlang_version }}-1~{{ ansible_distribution|lower }}~{{ ansible_distribution_release|lower }}_{{ ansible_architecture if ansible_architecture  == 'i386' else 'amd64' }}.deb"
 
-- debug:
-    msg: "{{ erlang_file_deb }}"
 
 - name: "download erlang package version {{ rabbitmq_erlang_version }}"
   get_url:
